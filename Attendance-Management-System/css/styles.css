@@ -1,0 +1,20 @@
+
+*{
+    margin: 0;
+    padding: 0;
+   
+}
+
+
+.loginform,.signupform{
+    padding: 20px;
+}
+
+input[type=submit]{
+    margin: 10px 0;
+}
+
+a{
+    text-decoration: none;
+}
+
