@@ -1,6 +1,5 @@
 <?php
     include '..\partials\_dbconnect.php';
-    include '..\partials\_export-to-excel.php';
 
     session_start();
     if(isset($_SESSION["username"])){
@@ -10,14 +9,13 @@
     }
 ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Display Attendence</title>
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="css\styles.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
@@ -44,62 +42,69 @@
     </nav>
 
     <div class="header">
-       <h1 style="font-family:initial" class="text-center">Display Attendance</h1>
+       <h1 style="font-family:initial" class="text-center">Create Batches here</h1>
     </div>    
+    
 
-    <div class="displayattendence">
-        <form action="<?php echo $_SERVER['PHP_SELF'];?>" method="post" class="form-control ">
+    <div class="create-batches">        
+        <form action="<?php echo $_SERVER['PHP_SELF'];?>" class="form-control" method="post">
+           <h1 class="text-center">Create Batches</h1>
 
-        <div>
-            <label for="Attendancedate">Enter the Date: </label>
-            <input class="form-control" placeholder="yyyy-mm-dd" type="text" name="Attendancedate" id="">
-            <input type="submit" value="submit" name="submitdate" class="btn btn-primary " >
-        </div>
+           <label for="student-id">Enter Batch Name:</label>
+           <input type="text" class="form-control" name="student-id" id="sid">   
+           <input type="submit" value ="submit" class="btn btn-primary">
         </form>
-
-        <?php
-
-            if($_SERVER["REQUEST_METHOD"]=="POST"){
-
-             $date = $_POST['Attendancedate'];   
-
-            $sql = "SELECT `sid`,`name`,`attendance` from daily_attendance,students where `date`='$date' AND `sid`=`id`";
-
-            $result = $conn->query($sql);
-
-            if ($result->num_rows > 0) {
-
-                echo "<table class='table table-light table-striped'><tr><th> ID</th><th>Student Name</th><th>Attendance</th></tr>";
-        
-                while($row = $result->fetch_assoc()) {
-                echo "<tr><td>".$row['sid']."</td><td>".$row['name']."</td><td>".$row['attendance']."</td></tr>";
-             }
-                echo "</table>";
-            echo "<button class='btn btn-success' >Generate Excel sheet</button><br>";
-            } else {
-            echo "<div class='alert alert-danger' role='alert'>Invalid Entry!!</div>";
-            }
-    }
-
-        
-    ?>
-
     </div>
 
-    
+        <?php
+            
+            if($_SERVER["REQUEST_METHOD"]=="POST"){
+
+                    foreach ($_POST as $id => $attendance) {
+
+                            $sql = "INSERT INTO `daily_attendance` (`date`, `sid`, `attendance`)
+                                    VALUES ('$today_date', '$id', '$attendance')";
+
+                            $result = mysqli_query($conn, $sql);
+                            $_POST = array();
+                        }
+                        
+                        echo "<div class='alert alert-success' role='alert'>You have successfully taken today's attendance!</div>";
+                        header("Refresh: 5;URL=display-attendance.php");
+
+
+                }else{
+                    echo"";
+                } 
+        
+        ?>  
+
+
+    <div class="addordelete">
+        <form method="post" class="form-control">
+         <h1 class="text-center">Add/Delete Students to Batches</h1>
+
+            <label for="batch-name">Select batch:</label>
+            <select style="width:60%" name="designation" class="form-control">
+                <option value="none" selected disabled hidden> Select from here </option> 
+                <option value="teacher">Batches will appear here..</option>
+            </select>
+
+            <label for="student-id">Enter Student id:</label>
+            <input type="text" class="form-control" name="student-id" id="sid">
+
+            <input type="submit" value ="add" id="add" class="btn btn-primary">
+            <input type="submit" value ="delete" id="delete" class="btn btn-danger">
+         </form>
+    </div> 
+
+</div>
+
+
 </body>
 </html>
 
 <style>
-
-    .displayattendence{
-        /* text-align:center; */
-    }
-
-
-    h1{
-        font-family:initial;
-    }
 
     .header{
         margin:0;
@@ -109,16 +114,9 @@
         width:100%;
     }
 
-    .navbar{
-        padding:20px 0;
-    }
-
-    .dropdown{
-        display:inline;
-    }
-
     h1{
         padding:10px;
+        font-family: initial;
     }
 
     body{
@@ -137,7 +135,14 @@
         width:60%;
     }
 
-    .takeAttendance{
+    .addordelete{
+        width:100%;
+        background-color:white;
+        padding:10px;
+        margin:15px 0;
+    }
+
+    .create-batches{
         width:100%;
         background-color:white;
         padding:10px;
@@ -151,12 +156,35 @@
     }
 
     .btn{
-        margin:5px 2px;
+        margin:0 2px;
+    }
+
+    input[type=radio]{
+        margin-right:10px;
     }
 
     .displayattendence{
         width:100%;
     }
 
+
+    a{
+       text-decoration:none; 
+       color:white;
+       padding:20px 5px;
+    }
+
+    .navbar{
+        padding:20px 0;
+    }
+
+
+    .btn{
+        margin:0 5px;
+    }
     
+    .dropdown{
+        display:inline;
+    }
 </style>
+
